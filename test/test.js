@@ -76,7 +76,7 @@ describe('Array', function() {
 	  lib.lib_push.msgs = [];
 	  step1();
 	  function step2() {
-		  var req = {body:{channelid:'test',token:token,otp:'567812'}};
+		  var req = {body:{channelid:'test',token:token,otp:lib._store.otp[token]}};
 		  var res = {
 			  json : function(json) {
 				  assert.equal(json.status, 0);
@@ -98,7 +98,7 @@ describe('Array', function() {
 	  lib.lib_push.msgs = [];
 	  step1();
 	  function step2() {
-		  var req = {body:{channelid:'invalid',token:token,otp:'567812'}};
+		  var req = {body:{channelid:'invalid',token:token,otp:lib._store.otp[token]}};
 		  var res = {
 			  json : function(json) {
 				  assert.equal(json.status, 101);
@@ -120,7 +120,7 @@ describe('Array', function() {
 	  lib.lib_push.msgs = [];
 	  step1();
 	  function step2() {
-		  var req = {body:{channelid:'test',otp:'567812'}};
+		  var req = {body:{channelid:'test',otp:lib._store.otp[token]}};
 		  var res = {
 			  json : function(json) {
 				  assert.equal(json.status, 102);
@@ -142,7 +142,7 @@ describe('Array', function() {
 	  lib.lib_push.msgs = [];
 	  step1();
 	  function step2() {
-		  var req = {body:{channelid:'test',token:token+'invalid',otp:'567812'}};
+		  var req = {body:{channelid:'test',token:token+'invalid',otp:lib._store.otp[token]}};
 		  var res = {
 			  json : function(json) {
 				  assert.equal(json.status, 104);
@@ -153,7 +153,27 @@ describe('Array', function() {
 		  lib.verifyotp(req, res);
 	  }
     });
-	
+	it('should not able to verify otp if invalid pin 1', function(done) {
+	  var lib = require('../lib.js');
+	  var token = null;
+	  function step1() {
+		lib.generateotp({body:{channelid:"test",userid:"fyhao"}},{json:function(json) {token = json.token;step2();}})
+	    
+	  }
+	  lib.lib_push.msgs = [];
+	  step1();
+	  function step2() {
+		  var req = {body:{channelid:'test',token:token,otp:'111111'}};
+		  var res = {
+			  json : function(json) {
+				  assert.equal(json.status, 401);
+				  assert.equal(lib.lib_push.msgs.length, 1);
+				  done();
+			  }
+		  };
+		  lib.verifyotp(req, res);
+	  }
+    });
   });
   
   describe('#user()', function() {
@@ -211,6 +231,41 @@ describe('Array', function() {
 		  }
 	  };
 	  lib.user(req, res);
+    });
+  });
+  
+  describe('#generateotppin()', function() {
+	it('should return PIN with length 6', function(done) {
+	  var lib = require('../lib.js');
+	  function step1() {
+		  lib._generateotppin('test',function(token,pin) {
+			  assert.equal(pin.length, 6);
+			  done();
+		  });
+	  }
+	  step1();
+	});
+    it('should return different unique pin each time when generate', function(done) {
+      var lib = require('../lib.js');
+	  var pin1 = null;
+	  var pin2 = null;
+	  function step1() {
+		  lib._generateotppin('test',function(token,pin) {
+			  pin1 = pin;
+			  step2();
+		  });
+	  }
+	  function step2() {
+		  lib._generateotppin('test',function(token,pin) {
+			  pin2 = pin;
+			  step3();
+		  });
+	  }
+	  function step3() {
+		  assert.equal(pin1 != pin2, true);
+		  done();
+	  }
+	  step1();
     });
   });
 });

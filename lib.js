@@ -1,3 +1,20 @@
+
+var generateotppin = function(channelid,fn) {
+	var token = '1234';
+	store.token[channelid] = token;
+	store.otp[token] = '' + Math.floor(100000 + Math.random() * 900000); // random 6 digit todo
+	fn(store.token[channelid],store.otp[token]);
+}
+var store = {
+	token : {},
+	otp : {},
+	user : {
+		'fyhao' : {
+			'contact_method' : 'telegram',
+			'telegramuserid':'fyhao1234'
+		}
+	}
+};
 var lib = {
 	opts : {},
 	lib_push : require('./lib_push.js'),
@@ -13,7 +30,7 @@ var lib = {
 			res.json({status:102});
 			return;
 		}
-		generateotp(channelid, function(token,pin) {
+		generateotppin(channelid, function(token,pin) {
 			me.lib_push.push({opts:me.opts,user:store.user[userid],pin:pin});
 			res.json({status:0,token:token});
 		});
@@ -30,10 +47,7 @@ var lib = {
 			res.json({status:102});
 			return;
 		}
-		if(typeof store.token[channelid] == 'undefined') {
-			res.json({status:103});
-			return;
-		}
+		
 		if(typeof store.otp[token] == 'undefined') {
 			res.json({status:104});
 			return;
@@ -57,22 +71,10 @@ var lib = {
 			return;
 		}
 		res.json({status:0});
-	}
-};
-var generateotp = function(channelid,fn) {
-	var token = '1234';
-	store.token[channelid] = token;
-	store.otp[token] = '567812'; // random 6 digit todo
-	fn(store.token[channelid],store.otp[token]);
-}
-var store = {
-	token : {},
-	otp : {},
-	user : {
-		'fyhao' : {
-			'contact_method' : 'telegram',
-			'telegramuserid':'fyhao1234'
-		}
-	}
+	},
+	
+	_generateotppin : generateotppin,
+	
+	_store : store
 };
 module.exports = lib;
