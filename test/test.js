@@ -174,6 +174,76 @@ describe('Array', function() {
 		  lib.verifyotp(req, res);
 	  }
     });
+	
+	it('should not able to verify otp twice for two times valid', function(done) {
+	  var lib = require('../lib.js');
+	  var token = null;
+	  function step1() {
+		lib.generateotp({body:{channelid:"test",userid:"fyhao"}},{json:function(json) {token = json.token;step2();}})
+	    
+	  }
+	  lib.lib_push.msgs = [];
+	  step1();
+	  var otp = null;
+	  function step2() {
+		  otp = lib._store.otp[token];
+		  var req = {body:{channelid:'test',token:token,otp:otp}};
+		  var res = {
+			  json : function(json) {
+				  assert.equal(json.status, 0);
+				  assert.equal(lib.lib_push.msgs.length, 1);
+				  step3();
+			  }
+		  };
+		  lib.verifyotp(req, res);
+	  }
+	  function step3() {
+		  var req = {body:{channelid:'test',token:token,otp:otp}};
+		  var res = {
+			  json : function(json) {
+				  assert.equal(json.status != 0, true);
+				  assert.equal(lib.lib_push.msgs.length, 1);
+				  done();
+			  }
+		  };
+		  lib.verifyotp(req, res);
+	  }
+    });
+	
+	it('should not able to verify otp twice for invalid 1st time valid 2nd time', function(done) {
+	  var lib = require('../lib.js');
+	  var token = null;
+	  function step1() {
+		lib.generateotp({body:{channelid:"test",userid:"fyhao"}},{json:function(json) {token = json.token;step2();}})
+	    
+	  }
+	  lib.lib_push.msgs = [];
+	  step1();
+	  var otp = null;
+	  function step2() {
+		  otp = lib._store.otp[token];
+		  var req = {body:{channelid:'test',token:token,otp:'invalid'}};
+		  var res = {
+			  json : function(json) {
+				  assert.equal(json.status != 0, true);
+				  assert.equal(lib.lib_push.msgs.length, 1);
+				  step3();
+			  }
+		  };
+		  lib.verifyotp(req, res);
+	  }
+	  function step3() {
+		  var req = {body:{channelid:'test',token:token,otp:otp}};
+		  var res = {
+			  json : function(json) {
+				  assert.equal(json.status != 0, true);
+				  assert.equal(lib.lib_push.msgs.length, 1);
+				  done();
+			  }
+		  };
+		  lib.verifyotp(req, res);
+	  }
+    });
   });
   
   describe('#user()', function() {

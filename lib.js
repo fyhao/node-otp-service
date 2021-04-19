@@ -57,10 +57,12 @@ var lib = {
 		}
 		var otp = req.body.otp;
 		if(store.otp[token] == otp) {
+			delete store.otp[token];
 			res.json({status:0});
 			return;
 		}
 		else {
+			delete store.otp[token];
 			res.json({status:401});
 			return;
 		}
