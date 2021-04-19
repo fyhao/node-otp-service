@@ -1,18 +1,21 @@
-
+var randomNumStr = function() {
+	return '' + Math.floor(100000 + Math.random() * 900000);
+}
 var generateotppin = function(channelid,fn) {
-	var token = '1234';
-	store.token[channelid] = token;
-	store.otp[token] = '' + Math.floor(100000 + Math.random() * 900000); // random 6 digit todo
-	fn(store.token[channelid],store.otp[token]);
+	var token = randomNumStr() + randomNumStr() + randomNumStr();
+	store.otp[token] = randomNumStr(); // random 6 digit todo
+	fn(token,store.otp[token]);
 }
 var store = {
-	token : {},
 	otp : {},
 	user : {
 		'fyhao' : {
 			'contact_method' : 'telegram',
 			'telegramuserid':'fyhao1234'
 		}
+	},
+	channel : {
+		'test' : {}
 	}
 };
 var lib = {
@@ -21,7 +24,7 @@ var lib = {
 	generateotp : function(req, res) {
 		var me = this;
 		var channelid = req.body.channelid;
-		if(channelid != 'test') {
+		if(typeof store.channel[channelid] == 'undefined') {
 			res.json({status:101});
 			return;
 		}
@@ -38,7 +41,7 @@ var lib = {
 	
 	verifyotp : function(req, res) {
 		var channelid = req.body.channelid;
-		if(channelid != 'test') {
+		if(typeof store.channel[channelid] == 'undefined') {
 			res.json({status:101});
 			return;
 		}

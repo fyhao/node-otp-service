@@ -21,7 +21,15 @@ module.exports = function(opts) {
 	app.post('/user', jsonParser, function(req, res) {
 		lib.user(req, res);
 	});
+	app.get('/testdebug', function(req, res) {
+		res.json(lib._store);
+	});
 	  
-	app.listen(port)
+	app.listen(port);
+	
+	if(typeof lib.opts.init != 'undefined') lib.opts.init({
+		lib : lib,
+		app : app
+	});
 
 }
