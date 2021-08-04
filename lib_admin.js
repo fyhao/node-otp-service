@@ -18,6 +18,18 @@ var lib = {
 		}
 		status = 0;
 		res.json({status:status});
+	},
+	auditlog : function(lib) {
+		return function(req, res) {
+			var status = 401;
+			if(!auth(req,res)) {
+				status = 401;
+				res.json({status:status});
+				return;
+			}
+			status = 0;
+			res.json({status:status,logs: lib._audit});
+		};
 	}
 };
 module.exports = lib;

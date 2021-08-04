@@ -338,4 +338,24 @@ describe('Array', function() {
 	  step1();
     });
   });
+  describe('#auditlog()', function() {
+	it('should limit 100', function(done) {
+	  var lib = require('../lib.js');
+	  var req = {
+		  body : {
+			  channelid : 'test',
+			  userid : 'fyhao'
+		  }
+	  };
+	  var res = {
+		  json : function(json) {
+		  }
+	  };
+	  
+	  var expectedmax = 100;
+	  var i = 0; while(i++<expectedmax+10)lib.generateotp(req, res);
+	  assert.equal(100, lib._audit.length);
+	  done();
+	});
+  });
 });
