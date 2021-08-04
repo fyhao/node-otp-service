@@ -6,6 +6,8 @@ module.exports = function(opts) {
 	const app = express()
 	var lib = require('./lib.js');
 	lib.opts = opts;
+	var lib_admin = require('./lib_admin.js');
+	lib_admin.opts = opts;
 	var jsonParser = bodyParser.json()
 
 	app.get('/', function (req, res) {
@@ -55,6 +57,8 @@ module.exports = function(opts) {
 			lib.verifyotp(req1, res1);
 		}
 	});
+	
+	app.get('/admin/status', lib_admin.status);
 	  
 	app.listen(port);
 	
