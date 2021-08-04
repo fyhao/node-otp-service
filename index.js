@@ -45,6 +45,9 @@ module.exports = function(opts) {
 						var endtime = new Date().getTime();
 						var diff = endtime - starttime;
 						resjson.diffms = diff;
+						var otpcnt = 0;
+						for(var i in lib._store.otp) otpcnt++;
+						resjson.otpcnt = otpcnt;
 						res.json(resjson);
 					 }
 				}
