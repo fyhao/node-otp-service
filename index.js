@@ -59,6 +59,7 @@ module.exports = function(opts) {
 	});
 	
 	app.get('/admin/status', lib_admin.status);
+	app.get('/admin/auditlog', lib_admin.auditlog(lib));
 	  
 	app.listen(port);
 	
