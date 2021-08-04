@@ -46,31 +46,31 @@ var lib = {
 		var me = this;
 		var channelid = req.body.channelid;
 		if(typeof store.channel[channelid] == 'undefined') {
-			me.auditlog('veirifyotp channelid=' + channelid + ' token=' + token + ' otp=' + otp + ' status=101');
+			me.auditlog('verifyotp channelid=' + channelid + ' token=' + token + ' otp=' + otp + ' status=101');
 			res.json({status:101});
 			return;
 		}
 		var token = req.body.token;
 		if(token == null || token.length == 0) {
-			me.auditlog('veirifyotp channelid=' + channelid + ' token=' + token + ' otp=' + otp + ' status=102');
+			me.auditlog('verifyotp channelid=' + channelid + ' token=' + token + ' otp=' + otp + ' status=102');
 			res.json({status:102});
 			return;
 		}
 		
 		if(typeof store.otp[token] == 'undefined') {
-			me.auditlog('veirifyotp channelid=' + channelid + ' token=' + token + ' otp=' + otp + ' status=104');
+			me.auditlog('verifyotp channelid=' + channelid + ' token=' + token + ' otp=' + otp + ' status=104');
 			res.json({status:104});
 			return;
 		}
 		var otp = req.body.otp;
 		if(store.otp[token] == otp) {
-			me.auditlog('veirifyotp channelid=' + channelid + ' token=' + token + ' otp=' + otp + ' status=0');
+			me.auditlog('verifyotp channelid=' + channelid + ' token=' + token + ' otp=' + otp + ' status=0');
 			delete store.otp[token];
 			res.json({status:0});
 			return;
 		}
 		else {
-			me.auditlog('veirifyotp channelid=' + channelid + ' token=' + token + ' otp=' + otp + ' status=401');
+			me.auditlog('verifyotp channelid=' + channelid + ' token=' + token + ' otp=' + otp + ' status=401');
 			delete store.otp[token];
 			res.json({status:401});
 			return;
