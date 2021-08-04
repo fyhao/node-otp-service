@@ -24,6 +24,34 @@ module.exports = function(opts) {
 	app.get('/testdebug', function(req, res) {
 		res.json(lib._store);
 	});
+	
+	app.get('/status', function(req, res) {
+		var resjson = {};
+		var starttime = new Date().getTime();
+		var lib = require('./lib.js');
+		var token = null;
+		function step1() {
+			lib.generateotp({body:{channelid:"test",userid:"fyhao"}},{json:function(json) {token = json.token;step2();}})
+			
+		}
+		lib.lib_push.msgs = [];
+		step1();
+		function step2() {
+			var req1 = {body:{channelid:'test',token:token,otp:lib._store.otp[token]}};
+			var res1 = {
+				json : function(json) {
+					if(json.status == 0) {
+						resjson.status = 0;
+						var endtime = new Date().getTime();
+						var diff = endtime - starttime;
+						resjson.diffms = diff;
+						res.json(resjson);
+					 }
+				}
+			};
+			lib.verifyotp(req1, res1);
+		}
+	});
 	  
 	app.listen(port);
 	
