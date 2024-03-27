@@ -31,7 +31,7 @@
   "homepage": "https://github.com/fyhao/node-otp-service#readme",
   "dependencies": {
     "body-parser": "^1.19.0",
-    "express": "^4.17.1"
+    "express": "^4.19.2"
   },
   "devDependencies": {
     "coveralls": "^2.13.0",
