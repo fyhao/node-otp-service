@@ -1,20 +1,11 @@
 {
   "name": "node-otp-service",
   "version": "1.0.0",
-  "description": "OTP",
+  "description": "Generic OTP generation and verification service with pluggable push delivery",
   "main": "index.js",
   "scripts": {
-    "test": "nyc --reporter=html --reporter=text mocha test/test.js",
-    "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "pack": "build --dir",
-    "dist": "build",
-    "dist-x": "build -ml",
-    "release": "build --publish onTagOrDraft",
-    "postinstall": "install-app-deps",
-    "performance": "node --allow-natives-syntax ./node_modules/mocha/bin/_mocha --reporter mocha-performance ./test/test.js",
-    "snyk-protect": "snyk protect",
-    "prepare": "npm run snyk-protect",
-    "prepublish": "npm run snyk-protect"
+    "test": "nyc --reporter=html --reporter=text mocha \"test/**/*.test.js\"",
+    "coverage": "nyc report --reporter=text-lcov"
   },
   "repository": {
     "type": "git",
@@ -30,21 +21,13 @@
   },
   "homepage": "https://github.com/fyhao/node-otp-service#readme",
   "dependencies": {
-    "body-parser": "^1.19.0",
-    "express": "^4.17.1"
+    "express": "^5.1.0"
   },
   "devDependencies": {
-    "coveralls": "^2.13.0",
-    "electron": "^9.1.0",
-    "electron-builder": "^17.0.1",
-    "electron-prebuilt": "^1.4.13",
-    "electron-reload": "^1.1.0",
-    "istanbul": "^0.4.5",
-    "mitm": "^1.3.2",
-    "mocha": "^8.3.2",
-    "mocha-lcov-reporter": "^1.3.0",
-    "mocha-performance": "^0.1.1",
-    "nyc": "^15.1.0",
-    "snyk": "^1.547.0"
+    "mocha": "^11.7.1",
+    "nyc": "^17.1.0"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

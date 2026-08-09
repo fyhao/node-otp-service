@@ -1,35 +1,28 @@
+'use strict';
 
-var store = {
-	apikey : '1234'
+let options = {};
+
+function auth(req) {
+  const expected = options.adminApiKey || process.env.ADMIN_API_KEY;
+  return typeof expected === 'string' && expected.length > 0 && req.headers['x-api-key'] === expected;
+}
+
+const lib = {
+  configure(opts = {}) {
+    options = opts;
+    return this;
+  },
+
+  status(req, res) {
+    return res.json({ status: auth(req) ? 0 : 401 });
+  },
+
+  auditlog(otpLib) {
+    return function auditlogHandler(req, res) {
+      if (!auth(req)) return res.json({ status: 401 });
+      return res.json({ status: 0, logs: otpLib._audit });
+    };
+  }
 };
-var auth = function(req, res) {
-	if(req.headers['x-api-key'] == store.apikey) {
-		return true;
-	}
-	return false;
-};
-var lib = {
-	status : function(req, res) {
-		var status = 401;
-		if(!auth(req,res)) {
-			status = 401;
-			res.json({status:status});
-			return;
-		}
-		status = 0;
-		res.json({status:status});
-	},
-	auditlog : function(lib) {
-		return function(req, res) {
-			var status = 401;
-			if(!auth(req,res)) {
-				status = 401;
-				res.json({status:status});
-				return;
-			}
-			status = 0;
-			res.json({status:status,logs: lib._audit});
-		};
-	}
-};
+
 module.exports = lib;

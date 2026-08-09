@@ -1,71 +1,65 @@
+'use strict';
 
-module.exports = function(opts) {
-	var port = process.env.PORT || 20003;
-	const express = require('express')
-	var bodyParser = require('body-parser')
-	const app = express()
-	var lib = require('./lib.js');
-	lib.opts = opts;
-	var lib_admin = require('./lib_admin.js');
-	lib_admin.opts = opts;
-	var jsonParser = bodyParser.json()
+module.exports = function createOtpService(opts = {}) {
+  const express = require('express');
+  const lib = require('./lib.js').configure(opts);
+  const libAdmin = require('./lib_admin.js').configure(opts);
+  const app = express();
 
-	app.get('/', function (req, res) {
-	  res.send('Hello World!!344')
-	})
+  app.use(express.json({ limit: '16kb' }));
 
-	app.post('/generateotp', jsonParser, function(req, res) {
-		lib.generateotp(req, res);
-	});
-	app.post('/verifyotp', jsonParser, function(req, res) {
-		lib.verifyotp(req, res);
-	});
-	app.post('/user', jsonParser, function(req, res) {
-		lib.user(req, res);
-	});
-	app.get('/testdebug', function(req, res) {
-		res.json(lib._store);
-	});
-	
-	app.get('/status', function(req, res) {
-		var resjson = {};
-		var starttime = new Date().getTime();
-		var lib = require('./lib.js');
-		var token = null;
-		function step1() {
-			lib.generateotp({body:{channelid:"test",userid:"fyhao"}},{json:function(json) {token = json.token;step2();}})
-			
-		}
-		lib.lib_push.msgs = [];
-		step1();
-		function step2() {
-			var req1 = {body:{channelid:'test',token:token,otp:lib._store.otp[token]}};
-			var res1 = {
-				json : function(json) {
-					if(json.status == 0) {
-						resjson.status = 0;
-						var endtime = new Date().getTime();
-						var diff = endtime - starttime;
-						resjson.diffms = diff;
-						var otpcnt = 0;
-						for(var i in lib._store.otp) otpcnt++;
-						resjson.otpcnt = otpcnt;
-						res.json(resjson);
-					 }
-				}
-			};
-			lib.verifyotp(req1, res1);
-		}
-	});
-	
-	app.get('/admin/status', lib_admin.status);
-	app.get('/admin/auditlog', lib_admin.auditlog(lib));
-	  
-	app.listen(port);
-	
-	if(typeof lib.opts.init != 'undefined') lib.opts.init({
-		lib : lib,
-		app : app
-	});
+  app.get('/', function root(req, res) {
+    res.send('node-otp-service');
+  });
 
-}
+  app.post('/generateotp', function generate(req, res, next) {
+    Promise.resolve(lib.generateotp(req, res)).catch(next);
+  });
+  app.post('/verifyotp', function verify(req, res) {
+    lib.verifyotp(req, res);
+  });
+  app.post('/user', function user(req, res) {
+    lib.user(req, res);
+  });
+
+  if (opts.enableDebug === true) {
+    app.get('/testdebug', function debug(req, res) {
+      res.json(lib._store);
+    });
+  }
+
+  app.get('/status', async function status(req, res) {
+    const start = Date.now();
+    const channelid = Object.keys(lib._store.channel)[0];
+    if (!channelid) return res.status(503).json({ status: 101 });
+    let token;
+    let pin;
+    lib._generateotppin(channelid, function generated(generatedToken, generatedPin) {
+      token = generatedToken;
+      pin = generatedPin;
+    });
+    const record = lib._store.otp[token];
+    return lib.verifyotp(
+      { body: { channelid, token, otp: pin || record.pin } },
+      { json(json) {
+        res.status(json.status === 0 ? 200 : 503).json({
+          status: json.status,
+          diffms: Date.now() - start,
+          otpcnt: Object.keys(lib._store.otp).length
+        });
+      } }
+    );
+  });
+
+  app.get('/admin/status', libAdmin.status);
+  app.get('/admin/auditlog', libAdmin.auditlog(lib));
+
+  let server = null;
+  if (opts.listen !== false) {
+    const port = opts.port || process.env.PORT || 20003;
+    server = app.listen(port);
+  }
+
+  if (typeof opts.init === 'function') opts.init({ lib, app, server });
+  return { lib, app, server };
+};
