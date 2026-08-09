@@ -24,6 +24,8 @@ describe('HTTP service', function () {
 
   after(function (done) {
     server.close(done);
+    // Node 18 keeps fetch's HTTP connection alive, so close it explicitly.
+    server.closeAllConnections();
   });
 
   it('generates and verifies an OTP over HTTP', async function () {
